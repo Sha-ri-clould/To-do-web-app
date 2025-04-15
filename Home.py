@@ -11,8 +11,8 @@ def add_todo():
     todos.append(todo)
     ft.write_todos(todos)
 st.title("My Task App")
-st.subheader("Increase your productivity with ease!")
-st.write("Hey folks! This app helps to track your daily tasks and you won't forget your important tasks ;)")
+st.markdown("<i>Increase your productivity with ease!</i>",unsafe_allow_html=True)
+st.write("<i>Hey folks! This app helps to track your daily tasks and you won't forget your important tasks ;)</i>",unsafe_allow_html=True)
 
 for index,i in enumerate(todos):
     checkbox=st.checkbox(i,key=i)
@@ -23,6 +23,7 @@ for index,i in enumerate(todos):
         st.rerun()
 
 st.text_input(label="",placeholder="Add your task here..",on_change=add_todo,key='new_todo')
+
 
 print("hello")
 st.session_state
