@@ -1,7 +1,5 @@
-from tkinter import Image
-
 import streamlit as st
-from PIL import Image as image,ImageOps
+from PIL import Image as Image,ImageOps
 import os
 from io import BytesIO
 import numpy as np
@@ -18,32 +16,33 @@ with open(".streamlit/config.toml","w") as f:
 def camera():
     with st.expander('Tap to Open Camera'):
         cam_image=st.camera_input("Take a picture")
-        if(cam_image):
-            camera_image=image.open(cam_image)
+        if cam_image :
+            camera_image=Image.open(cam_image)
             return camera_image
 def upload():
     with st.expander('Tap to Upload Image'):
         uploaded_file = st.file_uploader("Upload Image",type=["png","jpg","jpeg"])
         if uploaded_file:
-            uploaded_image=image.open(uploaded_file)
+            uploaded_image=Image.open(uploaded_file)
             return uploaded_image
-def download(dwn_image,name,type):
-    enter=st.button("Download Image")
-    if enter:
-        save_path = rf"C:\Users\SHARIGA P\Pictures\image converter\{name}.{type.lower()}"
-        os.makedirs(os.path.dirname(save_path), exist_ok=True)
-        dwn_image.save(save_path, type.lower())
+def download(d1_img):
+    # Convert image to bytes for download
+    buffer = BytesIO()
+    d1_img.save(buffer, format="PNG")
+    byte_img = buffer.getvalue()
 
-        buf = BytesIO()
-        dwn_image.save(save_path, type.lower())
-        buf.seek(0)
-        st.download_button(
-            label="Download Image",
-            data=buf,
-            file_name=f"{name}.{type.lower()}",
-            mime="image/jpeg",
-        )
-        st.success(f"Image saved to: {save_path}")
+    # Display download button
+    st.download_button(
+        label="Download Image",
+        data=byte_img,
+        file_name="converted_image.png",
+        mime="image/png"
+    )
+   # Save image to internal storage
+    save_path = os.path.join(os.getcwd(), "converted_image.png")
+    d1_img.save(save_path)
+    st.success(f"Image saved to {save_path}")
+
 d_img=None
 st.title('Play with Pictures!')
 st.markdown("<i>Converts Image into Grey-Scale image , Posterize image and Negative image.</i>",unsafe_allow_html=True)
@@ -62,27 +61,27 @@ if img:
                 st.text('Grey Scale Image')
                 st.image(grey_img,use_container_width=True)
                 d_img=grey_img
+                download(d_img)
 
         if options=="Posterize Image":
             if img:
+                img = img.convert("RGB")
                 bits=st.slider("Select Posterize Image level",2,8,4,help="Higher bits more colors! Lower bits more abstract!")
                 result=ImageOps.posterize(img,bits)
                 st.text('Posterize Image')
                 st.image(result,use_container_width=True)
                 d_img=result
+                download(d_img)
+
 
         if options=="Negative image":
             if img:
                 img=np.array(img.convert("RGB"))
                 invert=255-img
-                pic=image.fromarray(invert)
+                pic=Image.fromarray(invert)
                 st.text('Negative Image')
                 st.image(pic,use_container_width=True)
                 d_img=pic
+                download(d_img)
 
-if d_img is not None:
-    st.subheader("Download your image here")
-    download_name = st.text_input("Enter file name",key='name')
-    download_type = st.radio("select image type", ["PNG", "JPG", "JPEG"],key='type')
-    if download_type=="JPEG":
-        download(d_img,download_name,download_type)
+
